@@ -9,6 +9,12 @@ SESSION_CONFIGS = [
         num_demo_participants=3,
     ),
     dict(
+        name='public_goods_simple',
+        display_name="Public goods simple",
+        app_sequence=['public_goods_simple', 'payment_info'],
+        num_demo_participants=4,
+    ),
+    dict(
         name='survey', app_sequence=['survey', 'payment_info'], num_demo_participants=1
     ),
 ]
