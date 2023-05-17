@@ -12,7 +12,7 @@ SESSION_CONFIGS = [
         name='public_goods_simple',
         display_name="Public goods simple",
         app_sequence=['public_goods_simple', 'payment_info'],
-        num_demo_participants=3,
+        num_demo_participants=4,
     ),
     dict(
         name='survey', app_sequence=['survey', 'payment_info'], num_demo_participants=1
@@ -30,6 +30,7 @@ SESSION_CONFIG_DEFAULTS = dict(
 
 PARTICIPANT_FIELDS = []
 SESSION_FIELDS = []
+CHANNEL_ROUTING = 'routing.channel_routing'
 
 # ISO-639 code
 # for example: de, fr, ja, ko, zh-hans
@@ -59,4 +60,4 @@ Here are some oTree games.
 
 SECRET_KEY = '5513532560785'
 
-INSTALLED_APPS = ['otree']
+INSTALLED_APPS = ['otree','otreechat']

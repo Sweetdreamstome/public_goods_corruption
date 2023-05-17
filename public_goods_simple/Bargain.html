@@ -1,0 +1,136 @@
+{{ extends "global/Page.html" }}
+{{ block title }}Decision{{ endblock }}
+{{ block content }}
+<script>
+    function displayTextFuncionario() {
+  var text = document.getElementById("textFieldFuncionario");
+  text.style.display = "block";
+}
+    function displayTextCiudadano() {
+  var text = document.getElementById("textFieldCiudadano");
+  text.style.display = "block";
+}
+
+
+
+</script>
+
+    <p>
+        Tu rol es {{ player.role }}
+
+{{ if player.role == "Funcionario" }}
+
+        Hay 1000 puntos para poder dar a los otros ciudadanos.
+
+        Si presionas el siguiente botón se convierten en 3000 puntos.
+
+    </p>
+    <button onclick="displayTextFuncionario()">Botón</button>
+
+    <div id="textFieldFuncionario" style="display: none;">
+        
+    <p>
+        Distribuye ahora los 3000 puntos:
+    </p>
+    <table>
+    <tr>
+        <th>Ciudadano 1: </th>
+        <td id="ciudadano-1">(none)</td>
+        <td>
+            <input type="number" id="offer1">
+            <button type="button" onclick="sendOffer1()" id="btn-offer">Distribuir</button>
+        </td>
+    </tr>
+    <tr>
+        <th>Ciudadano 2: </th>
+        <td id="ciudadano-2">(none)</td>
+        <td>
+            <input type="number" id="offer2">
+            <button type="button" onclick="sendOffer2()" id="btn-offer">Distribuir</button>
+        </td>
+    </tr>
+    <tr>
+        <th>Ciudadano 3: </th>
+        <td id="ciudadano-3">(none)</td>
+        <td>
+            <input type="number" id="offer3">
+            <button type="button" onclick="sendOffer3()" id="btn-offer">Distribuir</button>
+        </td>
+    </tr>
+    </table>
+    </div>
+
+{{ else }}
+
+    <p>
+        Tienes 500 para distribuir entre tu cuenta y un proyecto común.
+    </p>
+    <p>
+        Enviar <input type="number" id="enviado"> puntos.
+    </p>
+    <p>           
+         <button type="button" onclick="sendOffer()" id="btn-offer" onclick="displayTextCiudadano()">Enviar</button>
+    </p>
+    <div id="textFieldFuncionario" style="display: none;">
+        <p>
+        Todos los ciudadanos contribuyeron --- puntos, los que se convirtieron en --- puntos. 
+        </p>
+        {{ if player.role == 'Ciudadano 1'}}
+        <p>
+        La autoridad te distribuyó a ti <td id="ciudadano-1">(none)</td> puntos. 
+        </p>
+        <p>
+            Tu pago de la ronda es de --- puntos. 
+        </p>
+
+        {{ elif player.role == 'Ciudadano 2'}}
+        <p>
+        La autoridad te distribuyó a ti <td id="ciudadano-2">(none)</td> puntos. 
+        </p>
+        <p>
+            Tu pago de la ronda es de --- puntos. 
+        </p>
+        
+        {{ elif player.role == 'Ciudadano 3'}}
+        <p>
+        La autoridad te distribuyó a ti <td id="ciudadano-3">(none)</td> puntos. 
+        </p>
+        <p>
+            Tu pago de la ronda es de --- puntos. 
+        </p>
+        
+        {{ endif }}
+
+    </div>
+{{ endif }}
+    <script>
+            let offer1 = document.getElementById('offer1');
+            let offer2 = document.getElementById('offer2');
+            let offer3 = document.getElementById('offer3');
+            let msgCiudadano1 = document.getElementById('ciudadano-1');
+            let msgCiudadano2 = document.getElementById('ciudadano-2');
+            let msgCiudadano3 = document.getElementById('ciudadano-3');
+
+    function sendOffer1() {
+        liveSend({'type': 'propose', 'monto1': offer1.value})
+        offer1.value = '';
+    }
+    function sendOffer2() {
+        liveSend({'type': 'propose', 'monto2': offer2.value})
+        offer2.value = '';
+    }
+    function sendOffer3() {
+        liveSend({'type': 'propose', 'monto3': offer3.value})
+        offer3.value = '';
+    }
+
+    window.addEventListener('DOMContentLoaded', (event) => {
+        liveSend({});
+    });
+
+
+    </script>
+
+    {{ next_button }}
+
+{{ endblock }}
