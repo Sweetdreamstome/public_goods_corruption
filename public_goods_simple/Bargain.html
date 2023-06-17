@@ -1,5 +1,5 @@
 {{ extends "global/Page.html" }}
-{{ block title }}Decision{{ endblock }}
+
 {{ block content }}
 <script>
     function displayTextFuncionario() {
@@ -19,7 +19,7 @@
   position: fixed;
   z-index: 1;
   top: 0;
-  overflow-x: hidden;
+  overflow-x: auto;
   padding-top: 20px;
 }
 
@@ -52,6 +52,8 @@
 }
 </style>
 <div class="split left">
+    <div class="centered">
+
     <p>
         Tu rol es {{ player.role }}.
     </p>
@@ -145,14 +147,37 @@
 
 </div>
 
+</div>
+
 <div class="split right">
 
+<table>
+<tr>
 {% for config in player.chat_configs %}
-    <h4>{{ config.label }}</h4>
+<th>
+    <h6>{{ config.label }}</h6>
     {% chat nickname=player.chat_nickname channel=config.channel %}
+</th>
 {% endfor %}
+</tr>
+</table>
 
 </div>
+
+
+<style>
+    .otree-chat{
+        width: 250px
+    }
+    .otree-chat__messages {
+        height: 300px;
+        width: 230px
+    }
+    .otree-chat__input {
+        width: 230px
+    }
+
+</style>
 
     <script>
             let offer1 = document.getElementById('offer1');
@@ -205,6 +230,6 @@
 
     </script>
 
-    {{ next_button }}
+    
 
 {{ endblock }}

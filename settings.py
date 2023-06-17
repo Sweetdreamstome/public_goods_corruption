@@ -61,3 +61,4 @@ Here are some oTree games.
 SECRET_KEY = '5513532560785'
 
 INSTALLED_APPS = ['otree','otreechat']
+DEBUG = False

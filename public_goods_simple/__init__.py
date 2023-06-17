@@ -23,10 +23,13 @@ class Group(BaseGroup):
 
 
 class Player(BasePlayer):
-    monto_asignado1 = models.IntegerField()
-    monto_asignado2 = models.IntegerField()
-    monto_asignado3 = models.IntegerField()
-    monto_enviado= models.IntegerField()
+    monto_asignado1 = models.IntegerField(initial=0)
+    monto_asignado2 = models.IntegerField(initial=0)
+    monto_asignado3 = models.IntegerField(initial=0)
+    monto_enviado1 = models.IntegerField(initial=0)
+    monto_enviado2 = models.IntegerField(initial=0)
+    monto_enviado3 = models.IntegerField(initial=0)
+
     def chat_nickname(self):
         return '{}'.format(self.role)
 
@@ -41,16 +44,12 @@ class Player(BasePlayer):
                 # make a name for the channel that is the same for all
                 # channel members. That's why we order it (lower, higher)
                 'channel': '{}-{}-{}'.format(self.group.id, lower_id, higher_id),
-                'label': 'Chat with {}'.format(other.chat_nickname())
+                'label': 'Chat con {}'.format(other.chat_nickname())
             })
         return configs
 
 # PAGES
 class Bargain(Page):
-    @staticmethod
-    def vars_for_template(player: Player):
-        return dict(other_role=player.get_others_in_group()[0].role)
-
     @staticmethod
     def js_vars(player: Player):
         return dict(my_id=player.id_in_group)
