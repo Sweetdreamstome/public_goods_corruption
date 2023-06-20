@@ -27,6 +27,12 @@ class Group(BaseGroup):
 class Player(BasePlayer):
     iteration = models.IntegerField(initial=0)
     monto = models.IntegerField()
+    monto_offer1 = models.IntegerField()
+    monto_offer2 = models.IntegerField()
+    monto_offer3 = models.IntegerField()
+    monto_request1 = models.IntegerField()
+    monto_request2 = models.IntegerField()
+    monto_request3 = models.IntegerField()
     is_ready = models.BooleanField(initial=False)
     i_decided = models.BooleanField(initial=False)
     
@@ -72,13 +78,50 @@ class Bargain(Page):
     @staticmethod
     def live_method(player:Player, data):   
         my_id = player.id_in_group     
-        if 'monto' in data:
+        if data['type'] == 'bien_publico':
             try:
                 monto = int(data['monto'])
             except Exception:
                 print('Invalid', data)
                 return
             player.monto = monto
+        
+        if data['type'] == 'offer':
+            if 'monto_offer1' or 'monto_offer2' or 'monto_offer3' in data:
+                try:
+                    monto_offer1 = int(data['monto_offer1'])
+                    player.monto_offer1 = monto_offer1
+                except Exception:
+                    print('Invalid', data)
+                try:
+                    monto_offer2 = int(data['monto_offer2'])
+                    player.monto_offer2 = monto_offer2
+                except Exception:
+                    print('Invalid', data)
+                try:
+                    monto_offer3 = int(data['monto_offer3'])
+                    player.monto_offer3 = monto_offer3
+                except Exception:
+                    print('Invalid',data)
+
+        if data['type'] == 'request':
+            if 'monto_request1' or 'monto_request2' or 'monto_request3' in data:
+                try:
+                    monto_request1 = int(data['monto_request1'])
+                    player.monto_request1 = monto_request1
+                except Exception:
+                    print('Invalid', data)
+                try:
+                    monto_request2 = int(data['monto_request2'])
+                    player.monto_request2 = monto_request2
+                except Exception:
+                    print('Invalid', data)
+                try:
+                    monto_request3 = int(data['monto_request3'])
+                    player.monto_request3 = monto_request3
+                except Exception:
+                    print('Invalid', data)
+                    
         proposals = []
         montos = []
         for p in {player, player.get_others_in_group()[0], player.get_others_in_group()[1], player.get_others_in_group()[2]}:

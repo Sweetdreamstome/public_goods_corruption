@@ -108,6 +108,33 @@
 {% endfor %}
 </tr>
 </table>
+<br><br>
+<table>
+    <tr>
+        <th>
+            <button type="button" onclick="sendOfferOther1()" id="btn_offer1">Enviar puntos</button><input type="number" id="offer_other1">
+        </th>
+        <th>
+            <button type="button" onclick="sendOfferOther2()" id="btn_offer2">Enviar puntos</button><input type="number" id="offer_other2">
+        </th>
+        <th>
+            <button type="button" onclick="sendOfferOther3()" id="btn_offer3">Enviar puntos</button><input type="number" id="offer_other3">
+        </th>
+    </tr>
+    <tr>
+        <th>
+            <button type="button" onclick="sendRequestOther1()" id="btn_request1">Solicitar puntos</button><input type="number" id="request_other1">
+        </th>
+        <th>
+            <button type="button" onclick="sendRequestOther2()" id="btn_request2">Solicitar puntos</button><input type="number" id="request_other2">
+        </th>
+        <th>
+            <button type="button" onclick="sendRequestOther3()" id="btn_request3">Solicitar puntos</button><input type="number" id="request_other3">
+        </th>
+    </tr>
+    
+    
+</table>
 
 </div>
 
@@ -133,8 +160,13 @@
     let my_offer= document.getElementById('my_offer');
     let msgMyProposal = document.getElementById('my-proposal');
     let sum_montos = 0;
-    let msgSumMontos = document.getElementById('sum_montos')
-
+    let msgSumMontos = document.getElementById('sum_montos');
+    let btn_offer1 = document.getElementById('btn_offer1');
+    let btn_offer2 = document.getElementById('btn_offer2');
+    let btn_offer3 = document.getElementById('btn_offer3');
+    let btn_request1 = document.getElementById('btn_request1');
+    let btn_request2 = document.getElementById('btn_request2');
+    let btn_request3 = document.getElementById('btn_request3');
 
     my_offer.addEventListener("keydown", function (event) {
         if (event.key === "Enter") {
@@ -143,11 +175,32 @@
     });
 
     function sendOffer() {
-        liveSend({ 'monto': my_offer.value });
-        console.log('se envio');
-
+        liveSend({ 'type':'bien_publico', 'monto': my_offer.value });
     }
-
+    function sendOfferOther1() {
+        liveSend({ 'type':'offer', 'monto_offer1': offer_other1.value,  });
+        btn_offer1.disabled = true;
+    }
+    function sendOfferOther2() {
+        liveSend({ 'type':'offer', 'monto_offer2': offer_other2.value });
+        btn_offer2.disabled = true;
+    }
+    function sendOfferOther3() {
+        liveSend({ 'type':'offer', 'monto_offer3': offer_other3.value });
+        btn_offer3.disabled = true;
+    }
+    function sendRequestOther1() {
+        liveSend({ 'type':'request', 'monto_request1': request_other1.value,  });
+        btn_request1.disabled = true;
+    }
+    function sendRequestOther2() {
+        liveSend({ 'type':'request', 'monto_request2': request_other1.value,  });
+        btn_request2.disabled = true;
+    }
+    function sendRequestOther3() {
+        liveSend({ 'type':'request', 'monto_request3': request_other1.value,  });
+        btn_request3.disabled = true;
+    }
     function show(ele) {
         for (let div of [waitDiv, decideDiv, resultsDiv]) {
             div.style.display = (div === ele) ? 'block' : 'none';
