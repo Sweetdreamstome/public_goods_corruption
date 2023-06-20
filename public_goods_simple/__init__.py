@@ -26,7 +26,9 @@ class Group(BaseGroup):
 
 class Player(BasePlayer):
     iteration = models.IntegerField(initial=0)
-    monto = models.IntegerField(initial=0)
+    monto = models.IntegerField()
+    is_ready = models.BooleanField(initial=False)
+    i_decided = models.BooleanField(initial=False)
     
 
     def chat_nickname(self):
@@ -48,6 +50,13 @@ class Player(BasePlayer):
         return configs
 
 # PAGES
+class WaitToStart(WaitPage):
+    pass
+    #@staticmethod
+    #def after_all_players_arrive(group: Group):
+        # # make the first one
+        # Game.create(group=group, iteration=group.iteration)
+
 class Bargain(Page):
 
     @staticmethod
@@ -61,9 +70,8 @@ class Bargain(Page):
         return dict(my_id = player.id_in_group)
     
     @staticmethod
-    def live_method(player:Player, data):
-        group = player.group
-        
+    def live_method(player:Player, data):   
+        my_id = player.id_in_group     
         if 'monto' in data:
             try:
                 monto = int(data['monto'])
@@ -72,20 +80,30 @@ class Bargain(Page):
                 return
             player.monto = monto
         proposals = []
+        montos = []
         for p in {player, player.get_others_in_group()[0], player.get_others_in_group()[1], player.get_others_in_group()[2]}:
             monto = p.field_maybe_none('monto')
             if monto is not None:
                 proposals.append([p.id_in_group, monto])
-        print(proposals)
-        return {0: dict(proposals=proposals)}
+                player.i_decided = True
+                montos.append(monto)
 
+        if len(montos) == 4:
+            player.is_ready = True
+            print(proposals)
+            return {0: dict(proposals=proposals, should_wait = False, show_results= True)}
 
-    @staticmethod
-    def error_message(player: Player, monto):
-        monto= player.monto
-        group = player.group
-        if monto > 500:
-            return 'Tiene que ser un valor menor a 500'
+        else:
+            player.is_ready = False
+            return {my_id: dict(should_wait = player.i_decided and not player.is_ready, show_results= False)}
+    
+
+    # @staticmethod
+    # def error_message(player: Player, monto):
+    #     monto= player.monto
+    #     group = player.group
+    #     if monto > 500:
+    #         return 'Tiene que ser un valor menor a 500'
 
     # @staticmethod
     # def is_displayed(player: Player):
@@ -102,4 +120,4 @@ class End(Page):
 
 
 
-page_sequence = [Bargain, End]
+page_sequence = [WaitToStart, Bargain, End]

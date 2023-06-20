@@ -53,54 +53,44 @@
 </style>
 <div class="split left">
     <div class="centered">
-
-    <p>
-        Tu rol es {{ player.role }}.
-    </p>
-    
-    <p>
-        Tienes 500 para distribuir entre tu cuenta y un proyecto común.
-    </p>
-
-    <table class="table">
-        <tr>
-            <th>Puntos a dar</th>
-            <td id="my-proposal">(none)</td>
-            <td>
-                <input type="number" id="my_offer">
-                <button type="button" onclick="sendOffer()" id="btn-offer">Enviar puntos</button>
-            </td>
-        </tr>
-        <tr>
-            <th>{{ role1 }} proposal</th>
-            <td id="other-proposal1"></td>
-        </tr>
-        <tr>
-            <th>{{ role2 }} proposal</th>
-            <td id="other-proposal2"></td>
-        </tr>
-        <tr>
-            <th>{{ role3 }} proposal</th>
-            <td id="other-proposal3"></td>
-        </tr>
-    </table>
-    
-
-    <div id="textFieldFuncionario" style="display: none;">
+        <div id="decide" style="display: none">
         <p>
-        Todos los ciudadanos contribuyeron --- puntos, los que se convirtieron en --- puntos. 
+            Tu rol es {{ player.role }}.
+        </p>
+        
+        <p>
+            Tienes 500 para distribuir entre tu cuenta y un proyecto común.
+        </p>
+        <p>
+            Puntos a dar:
+        </p>
+        <input type="number" id="my_offer">
+        <button type="button" onclick="sendOffer()" id="btn-offer">Enviar puntos</button>
+    </div>
+
+    <div id="wait" style="display: none">
+        <p>
+            Esperando a que los otros ciudadanos respondan...
+        </p>
+        <progress></progress>
+    </div>    
+
+    <div id="results" style="display: none;">
+        <p>
+        Contribuiste <span id="my-proposal"></span>.
+        </p>
+        <p>
+        Todos los ciudadanos contribuyeron <span id="sum_montos"></span> puntos, los que se convirtieron en --- puntos. 
         </p>
         <p>
         La autoridad te distribuyó a ti -- puntos. 
         </p>
         <p>
-            Tu pago de la ronda es de --- puntos. 
+        Tu pago de la ronda es de --- puntos. 
         </p>
-
 
     </div>
     <br><br>
-{{ next_button }}
 
 </div>
 
@@ -137,14 +127,14 @@
 </style>
 
     <script>
+    let waitDiv = document.getElementById('wait');
+    let decideDiv = document.getElementById('decide');
+    let resultsDiv = document.getElementById('results');
     let my_offer= document.getElementById('my_offer');
     let msgMyProposal = document.getElementById('my-proposal');
-    let msgOtherProposal1 = document.getElementById('other-proposal1');
-    let msgOtherProposal2 = document.getElementById('other-proposal2');
-    let msgOtherProposal3 = document.getElementById('other-proposal3');
-    let otherProposal1;
-    let otherProposal2;
-    let otherProposal3;
+    let sum_montos = 0;
+    let msgSumMontos = document.getElementById('sum_montos')
+
 
     my_offer.addEventListener("keydown", function (event) {
         if (event.key === "Enter") {
@@ -153,33 +143,53 @@
     });
 
     function sendOffer() {
-        liveSend({ 'monto': my_offer.value })
-        console.log('se envio')
+        liveSend({ 'monto': my_offer.value });
+        console.log('se envio');
+
     }
+
+    function show(ele) {
+        for (let div of [waitDiv, decideDiv, resultsDiv]) {
+            div.style.display = (div === ele) ? 'block' : 'none';
+        }
+    }
+
     function cu(monto) {
         return `${monto} puntos`;
     }
 
     function liveRecv(data) {
         console.log('received a message!', data);
+        
         if ('proposals' in data){
+            sum_montos = 0
             for (let [id_in_group, proposal] of data.proposals){
                 if (id_in_group === js_vars.my_id){
+
                 msgMyProposal.innerHTML = cu(proposal)
+                console.log(proposal)
+                } else {
+                    sum_montos = sum_montos + proposal
+                }
                 }
             }
-    }
-}
-
+        msgSumMontos.innerHTML = sum_montos
+        
+        let is_waiting = data.should_wait;
+        let is_results = data.show_results;
+        if (is_waiting) {
+            show(waitDiv)
+            } else if (is_results) {
+            show(resultsDiv)
+            } else {
+                show(decideDiv)
+            }
+        
+        }
+        
     window.addEventListener('DOMContentLoaded', (event) => {
-        liveSend({});
+        liveSend({'type':'load'});
     });
-
-    function displayTextCiudadano() {
-  var text = document.getElementById("textFieldCiudadano");
-  text.style.display = "block";
-}
-
 
 
     </script>
