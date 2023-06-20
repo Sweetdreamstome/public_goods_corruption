@@ -4,14 +4,15 @@ from otree.api import *
 
 class C(BaseConstants):
     NAME_IN_URL = 'public_goods_simple'
-    PLAYERS_PER_GROUP = 4
+    PLAYERS_PER_GROUP = None
     NUM_ROUNDS = 1
     ENDOWMENT = cu(100)
     MULTIPLIER = 1.8
-    FUNCIONARIO_ROLE = 'Funcionario'
+    #FUNCIONARIO_ROLE = 'Funcionario'
     CIUDADANO1_ROLE = 'Ciudadano 1'
     CIUDADANO2_ROLE = 'Ciudadano 2'
     CIUDADANO3_ROLE = 'Ciudadano 3'
+    CIUDADANO4_ROLE = 'Ciudadano 4'
 
 
 class Subsession(BaseSubsession):
@@ -19,16 +20,14 @@ class Subsession(BaseSubsession):
 
 
 class Group(BaseGroup):
-    pass
+    iteration = models.IntegerField(initial=0)
+    finished_sg = models.BooleanField(initial=False)
 
 
 class Player(BasePlayer):
-    monto_asignado1 = models.IntegerField(initial=0)
-    monto_asignado2 = models.IntegerField(initial=0)
-    monto_asignado3 = models.IntegerField(initial=0)
-    monto_enviado1 = models.IntegerField(initial=0)
-    monto_enviado2 = models.IntegerField(initial=0)
-    monto_enviado3 = models.IntegerField(initial=0)
+    iteration = models.IntegerField(initial=0)
+    monto = models.IntegerField(initial=0)
+    
 
     def chat_nickname(self):
         return '{}'.format(self.role)
@@ -50,53 +49,43 @@ class Player(BasePlayer):
 
 # PAGES
 class Bargain(Page):
+
     @staticmethod
+    def vars_for_template(player: Player):
+        return dict(role1 =player.get_others_in_group()[0].role,
+                    role2 =player.get_others_in_group()[1].role,
+                    role3 =player.get_others_in_group()[2].role, )
+
+    @staticmethod 
     def js_vars(player: Player):
-        return dict(my_id=player.id_in_group)
+        return dict(my_id = player.id_in_group)
+    
+    @staticmethod
+    def live_method(player:Player, data):
+        group = player.group
+        
+        if 'monto' in data:
+            try:
+                monto = int(data['monto'])
+            except Exception:
+                print('Invalid', data)
+                return
+            player.monto = monto
+        proposals = []
+        for p in {player, player.get_others_in_group()[0], player.get_others_in_group()[1], player.get_others_in_group()[2]}:
+            monto = p.field_maybe_none('monto')
+            if monto is not None:
+                proposals.append([p.id_in_group, monto])
+        print(proposals)
+        return {0: dict(proposals=proposals)}
+
 
     @staticmethod
-    def live_method(player: Player, data):
-
+    def error_message(player: Player, monto):
+        monto= player.monto
         group = player.group
-        #[other] = player.get_others_in_group()
-
-        if 'monto1' and 'monto2' and 'monto3' and 'monto4' in data:
-            try:
-                monto1 = int(data['monto1'])
-                monto2 = int(data['monto2'])
-                monto3 = int(data['monto3'])
-                monto4 = int(data['monto4'])
-
-            except Exception:
-                print('Invalid message received', data)
-                return
-            if data['type'] == 'propose':
-                player.monto_asignado1 = monto1
-                player.monto_asignado2 = monto2
-                player.monto_asignado3 = monto3
-                player.monto_enviado = monto4
-
-            proposals = []
-            monto_asignado1 = player.field_maybe_none('monto1')
-            monto_asignado2 = player.field_maybe_none('monto2')
-            monto_asignado3 = player.field_maybe_none('monto3')
-            monto_enviado = player.field_maybe_none('monto4')
-            if monto_asignado1 is not None:
-                proposals.append([player.id_in_group, monto_asignado1])
-            elif monto_asignado2  is not None:
-                proposals.append([player.id_in_group, monto_asignado2])
-            elif monto_asignado3  is not None:
-                proposals.append([player.id_in_group, monto_asignado3])
-            elif monto_enviado is not None:
-                proposals.append([player.id_in_group, monto_enviado])
-            print(proposals)
-            return {0: dict(proposals=proposals)}
-
-    # @staticmethod
-    # def error_message(player: Player, values):
-    #     group = player.group
-    #     if not group.is_finished:
-    #         return "Game not finished yet"
+        if monto > 500:
+            return 'Tiene que ser un valor menor a 500'
 
     # @staticmethod
     # def is_displayed(player: Player):
@@ -108,5 +97,9 @@ class Bargain(Page):
 class Results(Page):
     pass
 
+class End(Page):
+    pass
 
-page_sequence = [Bargain, Results]
+
+
+page_sequence = [Bargain, End]
