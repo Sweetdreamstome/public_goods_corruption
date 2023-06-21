@@ -131,9 +131,15 @@
         <th>
             <button type="button" onclick="sendRequestOther3()" id="btn_request3">Solicitar puntos</button><input type="number" id="request_other3">
         </th>
-    </tr>
+    </tr>    
+</table>
+<h6>Balance de transacciones</h6>
+<table>
+    <table class="table table-striped">
+        <tbody id="balance-body">
     
-    
+        </tbody>
+    </table>
 </table>
 
 </div>
@@ -168,17 +174,19 @@
     let btn_request2 = document.getElementById('btn_request2');
     let btn_request3 = document.getElementById('btn_request3');
 
+    let myBalance = document.getElementById('balance-body');
+    let cartTotal = document.getElementById('cart-total');
+
     my_offer.addEventListener("keydown", function (event) {
         if (event.key === "Enter") {
             sendOffer();
         }
     });
-
     function sendOffer() {
         liveSend({ 'type':'bien_publico', 'monto': my_offer.value });
     }
     function sendOfferOther1() {
-        liveSend({ 'type':'offer', 'monto_offer1': offer_other1.value,  });
+        liveSend({ 'type':'offer', 'monto_offer1': offer_other1.value, });
         btn_offer1.disabled = true;
     }
     function sendOfferOther2() {
@@ -190,17 +198,18 @@
         btn_offer3.disabled = true;
     }
     function sendRequestOther1() {
-        liveSend({ 'type':'request', 'monto_request1': request_other1.value,  });
+        liveSend({ 'type':'request', 'monto_request1': request_other1.value });
         btn_request1.disabled = true;
     }
     function sendRequestOther2() {
-        liveSend({ 'type':'request', 'monto_request2': request_other1.value,  });
+        liveSend({ 'type':'request', 'monto_request2': request_other2.value });
         btn_request2.disabled = true;
     }
     function sendRequestOther3() {
-        liveSend({ 'type':'request', 'monto_request3': request_other1.value,  });
+        liveSend({ 'type':'request', 'monto_request3': request_other3.value });
         btn_request3.disabled = true;
     }
+
     function show(ele) {
         for (let div of [waitDiv, decideDiv, resultsDiv]) {
             div.style.display = (div === ele) ? 'block' : 'none';
@@ -237,8 +246,30 @@
             } else {
                 show(decideDiv)
             }
-        
-        }
+
+        let html = '';
+        if ('montos_privados' in data){
+            for (let [role, monto, type] of data.montos_privados) {
+                if (type === 'offer'){
+                html += `
+            <tr>
+                <td>${'+'}</td>
+                <td>${role}</td>
+                <td>${'->'}</td>
+                <td>${cu(monto)}</td>
+            </tr>`;
+            } else if (type === 'request') {
+                html += `
+            <tr>
+                <td>${'-'}</td>
+                <td>${role}</td>
+                <td>${'<-'}</td>
+                <td>${cu(monto)}</td>
+            </tr>`;
+            }
+            myBalance.innerHTML = html;
+            //cartTotal.innerText = cu(data.total_price);
+        }}}
         
     window.addEventListener('DOMContentLoaded', (event) => {
         liveSend({'type':'load'});

@@ -78,6 +78,14 @@ class Bargain(Page):
     @staticmethod
     def live_method(player:Player, data):   
         my_id = player.id_in_group     
+        role1 =player.get_others_in_group()[0].role
+        role2 =player.get_others_in_group()[1].role
+        role3 =player.get_others_in_group()[2].role
+        other_id1 = player.get_others_in_group()[0].id_in_group
+        other_id2 = player.get_others_in_group()[1].id_in_group
+        other_id3 = player.get_others_in_group()[2].id_in_group
+
+
         if data['type'] == 'bien_publico':
             try:
                 monto = int(data['monto'])
@@ -85,19 +93,23 @@ class Bargain(Page):
                 print('Invalid', data)
                 return
             player.monto = monto
+            player.i_decided = True
         
+    
         if data['type'] == 'offer':
-            if 'monto_offer1' or 'monto_offer2' or 'monto_offer3' in data:
+            if 'monto_offer1' in data:
                 try:
                     monto_offer1 = int(data['monto_offer1'])
                     player.monto_offer1 = monto_offer1
                 except Exception:
                     print('Invalid', data)
+            if 'monto_offer2' in data:
                 try:
                     monto_offer2 = int(data['monto_offer2'])
                     player.monto_offer2 = monto_offer2
                 except Exception:
                     print('Invalid', data)
+            if 'monto_offer3' in data:
                 try:
                     monto_offer3 = int(data['monto_offer3'])
                     player.monto_offer3 = monto_offer3
@@ -105,40 +117,62 @@ class Bargain(Page):
                     print('Invalid',data)
 
         if data['type'] == 'request':
-            if 'monto_request1' or 'monto_request2' or 'monto_request3' in data:
+            if 'monto_request1' in data:
                 try:
                     monto_request1 = int(data['monto_request1'])
                     player.monto_request1 = monto_request1
                 except Exception:
                     print('Invalid', data)
+            if 'monto_request2' in data:
                 try:
                     monto_request2 = int(data['monto_request2'])
                     player.monto_request2 = monto_request2
                 except Exception:
                     print('Invalid', data)
+            if 'monto_request3' in data:
                 try:
                     monto_request3 = int(data['monto_request3'])
                     player.monto_request3 = monto_request3
                 except Exception:
                     print('Invalid', data)
-                    
+            
         proposals = []
         montos = []
+        montos_privados = []
+
         for p in {player, player.get_others_in_group()[0], player.get_others_in_group()[1], player.get_others_in_group()[2]}:
             monto = p.field_maybe_none('monto')
             if monto is not None:
                 proposals.append([p.id_in_group, monto])
-                player.i_decided = True
                 montos.append(monto)
 
+        if player.field_maybe_none('monto_offer1') is not None:
+                montos_privados.append([role1, player.field_maybe_none('monto_offer1'), 'offer'])
+        if player.field_maybe_none('monto_offer2') is not None:
+                montos_privados.append([role2, player.field_maybe_none('monto_offer2'), 'offer'])
+        if player.field_maybe_none('monto_offer3') is not None:
+                montos_privados.append([role3, player.field_maybe_none('monto_offer3'), 'offer'])
+        if player.field_maybe_none('monto_request1') is not None:
+                montos_privados.append([role1, player.field_maybe_none('monto_request1'), 'request'])
+        if player.field_maybe_none('monto_request2')  is  not None:
+                montos_privados.append([role2, player.field_maybe_none('monto_request2'), 'request' ])
+        if player.field_maybe_none('monto_request3')  is not None:
+                montos_privados.append([role3, player.field_maybe_none('monto_request3'), 'request' ])
+        
+        print(montos)
         if len(montos) == 4:
+            print(my_id, 'is ready')
             player.is_ready = True
             print(proposals)
-            return {0: dict(proposals=proposals, should_wait = False, show_results= True)}
-
+            return {my_id: dict(montos_privados = montos_privados, proposals=proposals, should_wait = False, show_results = True),
+                    other_id1: dict(show_results = True, proposals=proposals),
+                    other_id2: dict(show_results = True, proposals=proposals),
+                    other_id3: dict(show_results = True, proposals=proposals),
+                    }
         else:
-            player.is_ready = False
-            return {my_id: dict(should_wait = player.i_decided and not player.is_ready, show_results= False)}
+            print(my_id, 'is not ready')   
+            player.is_ready = False       
+            return {my_id: dict(montos_privados= montos_privados, should_wait = player.i_decided and not player.is_ready, show_results= False)}
     
 
     # @staticmethod
