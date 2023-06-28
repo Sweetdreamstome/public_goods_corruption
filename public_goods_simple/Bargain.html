@@ -58,14 +58,57 @@
             Tu rol es {{ player.role }}.
         </p>
         
-        <p>
-            Tienes 500 para distribuir entre tu cuenta y un proyecto común.
-        </p>
-        <p>
-            Puntos a dar:
-        </p>
-        <input type="number" id="my_offer">
-        <button type="button" onclick="sendOffer()" id="btn-offer">Enviar puntos</button>
+        {{ if player.role == 'Funcionario' }}
+            <p>
+                Hay 1000 puntos para dar a los otros ciudadanos.
+            </p>
+            <p>
+                Si presionas el siguiente botón se convierten en 3000 puntos.
+            </p>
+            <button type="button" onclick="displayTextFuncionario()"> Botón</button>
+            <br><br>
+            <div id="textFieldFuncionario" style="display: none;">
+                
+                <p>
+                    Distribuye ahora los 3000 puntos:
+                </p>
+                <table class="table">
+                    <tr>
+                        <th>Ciudadano 1: </th>
+                        <td>
+                            <input type="number" id="monto_fun1">
+                            <button type="button" onclick="sendOfferFun1()" id="btn-offer">Distribuir</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Ciudadano 2: </th>
+                        <td>
+                            <input type="number" id="monto_fun2">
+                            <button type="button" onclick="sendOfferFun2()" id="btn-offer">Distribuir</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Ciudadano 3: </th>
+                        <td>
+                            <input type="number" id="monto_fun3">
+                            <button type="button" onclick="sendOfferFun3()" id="btn-offer">Distribuir</button>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        
+
+        {{ else }}
+            <p>
+                Tienes 500 para distribuir entre tu cuenta y un proyecto común.
+            </p>
+            <p>
+                Puntos a dar:
+            </p>
+            <input type="number" id="my_offer">
+            <button type="button" onclick="sendOffer()" id="btn-offer">Enviar puntos</button>
+
+        {{ endif }}
     </div>
 
     <div id="wait" style="display: none">
@@ -77,18 +120,27 @@
 
     <div id="results" style="display: none;">
         <p>
+            Tu rol es {{ player.role }}.
+        </p>
+        {{ if player.role == 'Funcionario' }}
+        Todos los ciudadanos contribuyeron <span id="sum_montos"></span> puntos.
+        <p>
+            Tu pago de la ronda es de --- puntos. 
+        </p>
+        {{ else }}
+        <p>
         Contribuiste <span id="my-proposal"></span>.
         </p>
         <p>
         Todos los ciudadanos contribuyeron <span id="sum_montos"></span> puntos, los que se convirtieron en --- puntos. 
         </p>
         <p>
-        La autoridad te distribuyó a ti -- puntos. 
+        La autoridad te distribuyó a ti {{ if player.role == 'Ciudadano 1' }}<span id="monto1"></span>{{ elif player.role == 'Ciudadano 2' }}<span id="monto2"></span>{{ elif player.role == 'Ciudadano 3' }}<span id="monto3"></span>{{ endif }} puntos. 
         </p>
         <p>
         Tu pago de la ronda es de --- puntos. 
         </p>
-
+        {{ endif }}
     </div>
     <br><br>
 
@@ -165,6 +217,12 @@
     let resultsDiv = document.getElementById('results');
     let my_offer= document.getElementById('my_offer');
     let msgMyProposal = document.getElementById('my-proposal');
+    let monto_fun1 = document.getElementById('monto_fun1');
+    let monto_fun2 = document.getElementById('monto_fun2');
+    let monto_fun3 = document.getElementById('monto_fun3');
+    let msgMontoFun1 = document.getElementById('monto1');
+    let msgMontoFun2 = document.getElementById('monto2');
+    let msgMontoFun3 = document.getElementById('monto3');
     let sum_montos = 0;
     let msgSumMontos = document.getElementById('sum_montos');
     let btn_offer1 = document.getElementById('btn_offer1');
@@ -173,17 +231,45 @@
     let btn_request1 = document.getElementById('btn_request1');
     let btn_request2 = document.getElementById('btn_request2');
     let btn_request3 = document.getElementById('btn_request3');
+    let rolePlayer = {{ player.role | json }}
 
     let myBalance = document.getElementById('balance-body');
     let cartTotal = document.getElementById('cart-total');
 
-    my_offer.addEventListener("keydown", function (event) {
+    if (rolePlayer === 'Funcionario'){
+        monto_fun1.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+            sendOfferFun1();
+        }
+        })
+        monto_fun2.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+            sendOfferFun2();
+        }
+        })
+        monto_fun3.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+            sendOfferFun3();
+        }
+        })
+    } else {
+        my_offer.addEventListener("keydown", function (event) {
         if (event.key === "Enter") {
             sendOffer();
         }
     });
+    }
     function sendOffer() {
         liveSend({ 'type':'bien_publico', 'monto': my_offer.value });
+    }
+    function sendOfferFun1() {
+        liveSend({ 'type':'bien_publico', 'monto_fun1': monto_fun1.value });
+    }
+    function sendOfferFun2() {
+        liveSend({ 'type':'bien_publico', 'monto_fun2': monto_fun2.value });
+    }
+    function sendOfferFun3() {
+        liveSend({ 'type':'bien_publico', 'monto_fun3': monto_fun3.value });
     }
     function sendOfferOther1() {
         liveSend({ 'type':'offer', 'monto_offer1': offer_other1.value, });
@@ -253,23 +339,33 @@
                 if (type === 'offer'){
                 html += `
             <tr>
-                <td>${'+'}</td>
-                <td>${role}</td>
-                <td>${'->'}</td>
-                <td>${cu(monto)}</td>
-            </tr>`;
-            } else if (type === 'request') {
-                html += `
-            <tr>
                 <td>${'-'}</td>
                 <td>${role}</td>
                 <td>${'<-'}</td>
                 <td>${cu(monto)}</td>
             </tr>`;
+            } else if (type === 'request') {
+                html += `
+            <tr>
+                <td>${'+'}</td>
+                <td>${role}</td>
+                <td>${'->'}</td>
+                <td>${cu(monto)}</td>
+            </tr>`;
             }
             myBalance.innerHTML = html;
             //cartTotal.innerText = cu(data.total_price);
-        }}}
+        }}
+        if ('montos_funcionario' in data){
+            if (rolePlayer === 'Ciudadano 1'){
+                msgMontoFun1.innerHTML = data.montos_funcionario[0]
+        } else if (rolePlayer === 'Ciudadano 2'){
+            msgMontoFun2.innerHTML = data.montos_funcionario[1]
+        } else if (rolePlayer ==='Ciudadano 3'){
+            msgMontoFun3.innerHTML = data.montos_funcionario[2]
+        }
+        }
+    }
         
     window.addEventListener('DOMContentLoaded', (event) => {
         liveSend({'type':'load'});

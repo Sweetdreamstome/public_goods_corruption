@@ -8,11 +8,11 @@ class C(BaseConstants):
     NUM_ROUNDS = 1
     ENDOWMENT = cu(100)
     MULTIPLIER = 1.8
-    #FUNCIONARIO_ROLE = 'Funcionario'
+    FUNCIONARIO_ROLE = 'Funcionario'
     CIUDADANO1_ROLE = 'Ciudadano 1'
     CIUDADANO2_ROLE = 'Ciudadano 2'
     CIUDADANO3_ROLE = 'Ciudadano 3'
-    CIUDADANO4_ROLE = 'Ciudadano 4'
+    #CIUDADANO4_ROLE = 'Ciudadano 4'
 
 
 class Subsession(BaseSubsession):
@@ -35,6 +35,11 @@ class Player(BasePlayer):
     monto_request3 = models.IntegerField()
     is_ready = models.BooleanField(initial=False)
     i_decided = models.BooleanField(initial=False)
+    i_funcionario = models.BooleanField(initial = False)
+
+    monto_fun1 = models.IntegerField()
+    monto_fun2 = models.IntegerField()
+    monto_fun3 = models.IntegerField()
     
 
     def chat_nickname(self):
@@ -78,24 +83,60 @@ class Bargain(Page):
     @staticmethod
     def live_method(player:Player, data):   
         my_id = player.id_in_group     
-        role1 =player.get_others_in_group()[0].role
-        role2 =player.get_others_in_group()[1].role
-        role3 =player.get_others_in_group()[2].role
+        role1 = player.get_others_in_group()[0].role
+        role2 = player.get_others_in_group()[1].role
+        role3 = player.get_others_in_group()[2].role
         other_id1 = player.get_others_in_group()[0].id_in_group
         other_id2 = player.get_others_in_group()[1].id_in_group
         other_id3 = player.get_others_in_group()[2].id_in_group
 
-
         if data['type'] == 'bien_publico':
-            try:
-                monto = int(data['monto'])
-            except Exception:
-                print('Invalid', data)
-                return
-            player.monto = monto
-            player.i_decided = True
+            if 'monto' in data:
+                try:
+                    monto = int(data['monto'])
+                except Exception:
+                    print('Invalid', data)
+                    return
+                player.monto = monto
+                player.i_decided = True
+            
+            if 'monto_fun1' in data:
+                try:
+                    monto_fun1 = int(data['monto_fun1'])
+                except Exception:
+                    print('Invalid', data)
+                    return
+                player.monto_fun1 = monto_fun1
+                player.get_others_in_group()[0].monto_fun1 = monto_fun1
+                player.get_others_in_group()[1].monto_fun1 = monto_fun1
+                player.get_others_in_group()[2].monto_fun1 = monto_fun1
+
+            if 'monto_fun2' in data:
+                try:
+                    monto_fun2 = int(data['monto_fun2'])
+                except Exception:
+                    print('Invalid', data)
+                    return
+                player.monto_fun2 = monto_fun2
+                player.get_others_in_group()[0].monto_fun2 = monto_fun2
+                player.get_others_in_group()[1].monto_fun2 = monto_fun2
+                player.get_others_in_group()[2].monto_fun2 = monto_fun2
+
+            if 'monto_fun3' in data:
+                try:
+                    monto_fun3 = int(data['monto_fun3'])
+                except Exception:
+                    print('Invalid', data)
+                    return
+                player.monto_fun3 = monto_fun3
+                player.get_others_in_group()[0].monto_fun3 = monto_fun3
+                player.get_others_in_group()[1].monto_fun3 = monto_fun3
+                player.get_others_in_group()[2].monto_fun3 = monto_fun3
+
+            if 'monto_fun1' and 'monto_fun2' and 'monto_fun3' in data:
+                player.i_decided = True
+                player.i_funcionario = True
         
-    
         if data['type'] == 'offer':
             if 'monto_offer1' in data:
                 try:
@@ -139,6 +180,13 @@ class Bargain(Page):
         proposals = []
         montos = []
         montos_privados = []
+        montos_funcionario = []
+
+        if player.field_maybe_none('monto_fun1') and player.field_maybe_none('monto_fun2') and player.field_maybe_none('monto_fun3') is not None:
+            montos_funcionario.append(player.monto_fun1)
+            montos_funcionario.append(player.monto_fun2)
+            montos_funcionario.append(player.monto_fun3)
+
 
         for p in {player, player.get_others_in_group()[0], player.get_others_in_group()[1], player.get_others_in_group()[2]}:
             monto = p.field_maybe_none('monto')
@@ -160,20 +208,35 @@ class Bargain(Page):
                 montos_privados.append([role3, player.field_maybe_none('monto_request3'), 'request' ])
         
         print(montos)
-        if len(montos) == 4:
-            print(my_id, 'is ready')
-            player.is_ready = True
-            print(proposals)
-            return {my_id: dict(montos_privados = montos_privados, proposals=proposals, should_wait = False, show_results = True),
-                    other_id1: dict(show_results = True, proposals=proposals),
-                    other_id2: dict(show_results = True, proposals=proposals),
-                    other_id3: dict(show_results = True, proposals=proposals),
-                    }
+        if player.i_funcionario == True or player.get_others_in_group()[0].i_funcionario == True or player.get_others_in_group()[1].i_funcionario == True or player.get_others_in_group()[2].i_funcionario == True:
+            if len(montos) == 3:
+                print(my_id, 'is ready')
+                player.is_ready = True
+                print(proposals)
+                return {my_id: dict(montos_privados = montos_privados, proposals=proposals, should_wait = False, show_results = True, montos_funcionario = montos_funcionario),
+                        other_id1: dict(show_results = True, proposals=proposals, montos_funcionario = montos_funcionario),
+                        other_id2: dict(show_results = True, proposals=proposals, montos_funcionario = montos_funcionario),
+                        other_id3: dict(show_results = True, proposals=proposals, montos_funcionario = montos_funcionario),
+                        }
+            else:
+                print(my_id, 'is not ready')   
+                player.is_ready = False       
+                return {my_id: dict(montos_privados= montos_privados, should_wait = player.i_decided and not player.is_ready, show_results= False, montos_funcionario = montos_funcionario)}
         else:
-            print(my_id, 'is not ready')   
-            player.is_ready = False       
-            return {my_id: dict(montos_privados= montos_privados, should_wait = player.i_decided and not player.is_ready, show_results= False)}
-    
+            if len(montos) == 3:
+                print(my_id, 'is ready')
+                player.is_ready = True
+                print(proposals)
+                return {my_id: dict(montos_privados = montos_privados, proposals=proposals, should_wait = False, show_results = True),
+                        other_id1: dict(show_results = True, proposals=proposals),
+                        other_id2: dict(show_results = True, proposals=proposals),
+                        other_id3: dict(show_results = True, proposals=proposals),
+                        }
+            else:
+                print(my_id, 'is not ready')   
+                player.is_ready = False       
+                return {my_id: dict(montos_privados= montos_privados, should_wait = player.i_decided and not player.is_ready, show_results= False)}
+
 
     # @staticmethod
     # def error_message(player: Player, monto):
