@@ -12,10 +12,19 @@
 }
 </script>
 <style>
+
+table {
+width: 100%;
+margin: 0 auto;
+}
+td {
+
+vertical-align: top;
+}
     /* Split the screen in half */
 .split {
   height: 100%;
-  width: 50%;
+  width: 40%;
   position: fixed;
   z-index: 1;
   top: 0;
@@ -32,7 +41,8 @@
 /* Control the right side */
 .right {
   right: 0;
- 
+  height: 100vh;
+  width: 60vw;
   border-left:1px solid black;
 }
 
@@ -150,49 +160,66 @@
 
 <div class="split right">
 
-<table>
-<tr>
-{% for config in player.chat_configs %}
-<th>
-    <h6>{{ config.label }}</h6>
-    {% chat nickname=player.chat_nickname channel=config.channel %}
-</th>
-{% endfor %}
-</tr>
-</table>
-<br><br>
-<table>
-    <tr>
+        <table>
+        <tr>
+        {% for config in player.chat_configs %}
         <th>
-            <button type="button" onclick="sendOfferOther1()" id="btn_offer1">Enviar puntos</button><input type="number" id="offer_other1">
+            <h6>{{ config.label }}</h6>
+            {% chat nickname=player.chat_nickname channel=config.channel %}
         </th>
-        <th>
-            <button type="button" onclick="sendOfferOther2()" id="btn_offer2">Enviar puntos</button><input type="number" id="offer_other2">
-        </th>
-        <th>
-            <button type="button" onclick="sendOfferOther3()" id="btn_offer3">Enviar puntos</button><input type="number" id="offer_other3">
-        </th>
-    </tr>
-    <tr>
-        <th>
-            <button type="button" onclick="sendRequestOther1()" id="btn_request1">Solicitar puntos</button><input type="number" id="request_other1">
-        </th>
-        <th>
-            <button type="button" onclick="sendRequestOther2()" id="btn_request2">Solicitar puntos</button><input type="number" id="request_other2">
-        </th>
-        <th>
-            <button type="button" onclick="sendRequestOther3()" id="btn_request3">Solicitar puntos</button><input type="number" id="request_other3">
-        </th>
-    </tr>    
-</table>
-<h6>Balance de transacciones</h6>
-<table>
-    <table class="table table-striped">
-        <tbody id="balance-body">
-    
-        </tbody>
-    </table>
-</table>
+        {% endfor %}
+        </tr>
+        </table>
+
+        <br><br>
+
+        <table>
+            <tr>
+                <th>
+                    Interacción con {{ role1 }}
+                </th>
+                <th>
+                    Interacción con {{ role2 }}
+                </th>
+                <th>
+                    Interacción con {{ role3 }}
+                </th>
+            </tr>
+            <tr>
+                <th>
+                    <button type="button" onclick="sendOfferOther1()" id="btn_offer1">Enviar puntos&#160&#160</button><input type="number" id="offer_other1">
+                </th>
+                <th>
+                    <button type="button" onclick="sendOfferOther2()" id="btn_offer2">Enviar puntos&#160&#160</button><input type="number" id="offer_other2">
+                </th>
+                <th>
+                    <button type="button" onclick="sendOfferOther3()" id="btn_offer3">Enviar puntos&#160&#160</button><input type="number" id="offer_other3">
+                </th>
+            </tr>
+            <tr>
+                <th>
+                    <button type="button" onclick="sendRequestOther1()" id="btn_request1">Solicitar puntos&#160</button><input type="number" id="request_other1">
+                </th>
+                <th>
+                    <button type="button" onclick="sendRequestOther2()" id="btn_request2">Solicitar puntos&#160</button><input type="number" id="request_other2">
+                </th>
+                <th>
+                    <button type="button" onclick="sendRequestOther3()" id="btn_request3">Solicitar puntos&#160</button><input type="number" id="request_other3">
+                </th>
+            </tr>    
+        </table>
+
+
+            <br><br>
+        <h6>Balance de transacciones</h6>
+        <table>
+            <table class="table table-striped">
+                <tbody id="balance-body">
+            
+                </tbody>
+            </table>
+        </table>
+
 
 </div>
 
@@ -202,7 +229,7 @@
         width: 250px
     }
     .otree-chat__messages {
-        height: 300px;
+        height: 200px;
         width: 230px
     }
     .otree-chat__input {
@@ -235,6 +262,42 @@
 
     let myBalance = document.getElementById('balance-body');
     let cartTotal = document.getElementById('cart-total');
+
+    var interval;
+
+    var interval;
+
+function countdown() {
+  clearInterval(interval);
+  interval = setInterval( function() {
+      var timer = $('.js-timeout').html();
+      timer = timer.split(':');
+      var minutes = timer[0];
+      var seconds = timer[1];
+      seconds -= 1;
+      if (minutes < 0) return;
+      else if (seconds < 0 && minutes != 0) {
+          minutes -= 1;
+          seconds = 59;
+      }
+      else if (seconds < 10 && length.seconds != 2) seconds = '0' + seconds;
+
+      $('.js-timeout').html(minutes + ':' + seconds);
+
+      if (minutes == 0 && seconds == 0) clearInterval(interval);
+  }, 1000);
+}
+
+$('#js-startTimer').click(function () {
+  $('.js-timeout').text("2:00");
+  countdown();
+});
+
+$('#js-resetTimer').click(function () {
+  $('.js-timeout').text("2:00");
+  clearInterval(interval);
+});
+
 
     if (rolePlayer === 'Funcionario'){
         monto_fun1.addEventListener("keydown", function (event) {

@@ -206,8 +206,7 @@ class Bargain(Page):
                 montos_privados.append([role2, player.field_maybe_none('monto_request2'), 'request' ])
         if player.field_maybe_none('monto_request3')  is not None:
                 montos_privados.append([role3, player.field_maybe_none('monto_request3'), 'request' ])
-        
-        print(montos)
+
         if player.i_funcionario == True or player.get_others_in_group()[0].i_funcionario == True or player.get_others_in_group()[1].i_funcionario == True or player.get_others_in_group()[2].i_funcionario == True:
             if len(montos) == 3:
                 print(my_id, 'is ready')
