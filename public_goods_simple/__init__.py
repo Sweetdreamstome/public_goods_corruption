@@ -5,7 +5,7 @@ from otree.api import *
 class C(BaseConstants):
     NAME_IN_URL = 'public_goods_simple'
     PLAYERS_PER_GROUP = 4
-    NUM_ROUNDS = 1
+    NUM_ROUNDS = 5
     ENDOWMENT = cu(100)
     MULTIPLIER = 1.8
     FUNCIONARIO_ROLE = 'Funcionario'
@@ -39,7 +39,6 @@ class Subsession(BaseSubsession):
 class Group(BaseGroup):
     iteration = models.IntegerField(initial=0)
     finished_rondas = models.BooleanField(initial=False)
-
 
 class Player(BasePlayer):
     iteration = models.IntegerField(initial=0)
@@ -75,9 +74,39 @@ class Player(BasePlayer):
                 'label': 'Chat con {}'.format(other.chat_nickname())
             })
         return configs
-    
+
+def custom_export(players):
+    print('parece que si funciona')
+#  Export an ExtraModel called "Trial"
+
+    yield ['session', 'round_number', 'iteration', 'monto2', 'monto3', 'monto4', 'monto_fun1', 'monto_fun2', 'monto_fun3', 
+               'monto_offer11', 'monto_offer12', 'monto_offer13', 'monto_offer21', 'monto_offer22', 'monto_offer23', 'monto_offer31', 'monto_offer32', 'monto_offer33', 'monto_offer41', 'monto_offer42', 'monto_offer43', 
+               'monto_request11', 'monto_request12', 'monto_request13', 'monto_request21', 'monto_request22', 'monto_request23', 'monto_request31', 'monto_request32', 'monto_request33', 'monto_request41', 'monto_request42', 'monto_request43',
+            ]
+
+    # 'filter' without any args returns everything
+    rondas = Ronda.filter()
+    for ronda in rondas:
+        group = ronda.group
+        session = group.session
+        yield [
+                session.code, group.round_number, 
+                ronda.iteration, 
+                ronda.monto2, ronda.monto3, ronda.monto4,
+                ronda.monto_fun1, ronda.monto_fun2, ronda.monto_fun3,
+                ronda.monto_offer11, ronda.monto_offer12, ronda.monto_offer13, 
+                ronda.monto_offer21, ronda.monto_offer22, ronda.monto_offer23,
+                ronda.monto_offer31, ronda.monto_offer32, ronda.monto_offer33,
+                ronda.monto_offer41, ronda.monto_offer42, ronda.monto_offer43,
+                ronda.monto_request11, ronda.monto_request12, ronda.monto_request13,
+                ronda.monto_request21, ronda.monto_request22, ronda.monto_request23,
+                ronda.monto_request31, ronda.monto_request32, ronda.monto_request33,
+                ronda.monto_request41, ronda.monto_request42, ronda.monto_request43,
+            ]    
+
 class Ronda(ExtraModel):
     group = models.Link(Group)
+    player = models.Link(Player)
     iteration = models.IntegerField()
 
     # for monto in [Constants.montos_ciudadanos, Constants.montos_funcionarios, Constants.montos_ofrecidos, Constants.montos_pedidos]:
@@ -113,8 +142,8 @@ class Ronda(ExtraModel):
     i_funcionario = models.BooleanField(initial = False)
     i_ciudadanos = models.BooleanField(initial = False)
 
-def to_dict(ronda: Ronda):
-    return dict(montos_ciudadanos=ronda.monto, montos_ofrecidos=[ronda.monto_offer1, ronda.monto_offer2, ronda.monto_offer3], montos_pedidos=[ronda.monto_request1, ronda.monto_request2, ronda.monto_request3], montos_funcionario=[ronda.monto_fun1, ronda.monto_fun2, ronda.monto_fun3 ] )
+# def to_dict(ronda: Ronda):
+#     return dict(montos_ciudadanos=ronda.monto, montos_ofrecidos=[ronda.monto_offer1, ronda.monto_offer2, ronda.monto_offer3], montos_pedidos=[ronda.monto_request1, ronda.monto_request2, ronda.monto_request3], montos_funcionario=[ronda.monto_fun1, ronda.monto_fun2, ronda.monto_fun3 ] )
 
 # PAGES
 class WaitToStart(WaitPage):

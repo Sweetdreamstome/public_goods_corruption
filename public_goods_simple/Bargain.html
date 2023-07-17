@@ -163,7 +163,9 @@ vertical-align: top;
             Esperando a los otros jugadores del grupo...
         </p>
         <progress></progress>
-    </div>   
+    </div>  
+    
+    {{ next_button }}
 
 </div>
 
@@ -337,39 +339,43 @@ vertical-align: top;
     }
     function sendOffer() {
         liveSend({ 'type':'bien_publico', 'monto': my_offer.value });
+        my_offer.value = ''
     }
     function sendOfferFun1() {
         liveSend({ 'type':'bien_publico', 'monto_fun1': monto_fun1.value });
+        monto_fun1.value = ''
     }
     function sendOfferFun2() {
         liveSend({ 'type':'bien_publico', 'monto_fun2': monto_fun2.value });
+        monto_fun2.value = ''
     }
     function sendOfferFun3() {
         liveSend({ 'type':'bien_publico', 'monto_fun3': monto_fun3.value });
+        monto_fun3.value = ''
     }
     function sendOfferOther1() {
         liveSend({ 'type':'offer', 'monto_offer1': offer_other1.value, });
-        btn_offer1.disabled = true;
+        offer_other1.value = '';
     }
     function sendOfferOther2() {
         liveSend({ 'type':'offer', 'monto_offer2': offer_other2.value });
-        btn_offer2.disabled = true;
+        offer_other2.value = ''
     }
     function sendOfferOther3() {
         liveSend({ 'type':'offer', 'monto_offer3': offer_other3.value });
-        btn_offer3.disabled = true;
+        offer_other3.value = ''
     }
     function sendRequestOther1() {
         liveSend({ 'type':'request', 'monto_request1': request_other1.value });
-        btn_request1.disabled = true;
+        request_other1.value = ''
     }
     function sendRequestOther2() {
         liveSend({ 'type':'request', 'monto_request2': request_other2.value });
-        btn_request2.disabled = true;
+        request_other2.value = ''
     }
     function sendRequestOther3() {
         liveSend({ 'type':'request', 'monto_request3': request_other3.value });
-        btn_request3.disabled = true;
+        request_other3.value = ''
     }
     function nextRound() {
         liveSend({ 'type': 'finish_round', 'next_round': true });
