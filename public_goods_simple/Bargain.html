@@ -151,8 +151,19 @@ vertical-align: top;
         Tu pago de la ronda es de --- puntos. 
         </p>
         {{ endif }}
+        <p>
+            <button type="button" onclick="nextRound()" id="btn-next">Pasar a la siguiente ronda</button>
+        </p>
     </div>
     <br><br>
+
+    
+    <div id="wait_ronda" style="display: none">
+        <p>
+            Esperando a los otros jugadores del grupo...
+        </p>
+        <progress></progress>
+    </div>   
 
 </div>
 
@@ -242,6 +253,7 @@ vertical-align: top;
     let waitDiv = document.getElementById('wait');
     let decideDiv = document.getElementById('decide');
     let resultsDiv = document.getElementById('results');
+    let waitRondaDiv = document.getElementById('wait_ronda');
     let my_offer= document.getElementById('my_offer');
     let msgMyProposal = document.getElementById('my-proposal');
     let monto_fun1 = document.getElementById('monto_fun1');
@@ -259,44 +271,45 @@ vertical-align: top;
     let btn_request2 = document.getElementById('btn_request2');
     let btn_request3 = document.getElementById('btn_request3');
     let rolePlayer = {{ player.role | json }}
+    let btn_next = document.getElementById('btn-next');
 
     let myBalance = document.getElementById('balance-body');
     let cartTotal = document.getElementById('cart-total');
 
-    var interval;
+//     var interval;
 
-    var interval;
+//     var interval;
 
-function countdown() {
-  clearInterval(interval);
-  interval = setInterval( function() {
-      var timer = $('.js-timeout').html();
-      timer = timer.split(':');
-      var minutes = timer[0];
-      var seconds = timer[1];
-      seconds -= 1;
-      if (minutes < 0) return;
-      else if (seconds < 0 && minutes != 0) {
-          minutes -= 1;
-          seconds = 59;
-      }
-      else if (seconds < 10 && length.seconds != 2) seconds = '0' + seconds;
+// function countdown() {
+//   clearInterval(interval);
+//   interval = setInterval( function() {
+//       var timer = $('.js-timeout').html();
+//       timer = timer.split(':');
+//       var minutes = timer[0];
+//       var seconds = timer[1];
+//       seconds -= 1;
+//       if (minutes < 0) return;
+//       else if (seconds < 0 && minutes != 0) {
+//           minutes -= 1;
+//           seconds = 59;
+//       }
+//       else if (seconds < 10 && length.seconds != 2) seconds = '0' + seconds;
 
-      $('.js-timeout').html(minutes + ':' + seconds);
+//       $('.js-timeout').html(minutes + ':' + seconds);
 
-      if (minutes == 0 && seconds == 0) clearInterval(interval);
-  }, 1000);
-}
+//       if (minutes == 0 && seconds == 0) clearInterval(interval);
+//   }, 1000);
+// }
 
-$('#js-startTimer').click(function () {
-  $('.js-timeout').text("2:00");
-  countdown();
-});
+// $('#js-startTimer').click(function () {
+//   $('.js-timeout').text("2:00");
+//   countdown();
+// });
 
-$('#js-resetTimer').click(function () {
-  $('.js-timeout').text("2:00");
-  clearInterval(interval);
-});
+// $('#js-resetTimer').click(function () {
+//   $('.js-timeout').text("2:00");
+//   clearInterval(interval);
+// });
 
 
     if (rolePlayer === 'Funcionario'){
@@ -358,9 +371,12 @@ $('#js-resetTimer').click(function () {
         liveSend({ 'type':'request', 'monto_request3': request_other3.value });
         btn_request3.disabled = true;
     }
+    function nextRound() {
+        liveSend({ 'type': 'finish_round', 'next_round': true });
+    }
 
     function show(ele) {
-        for (let div of [waitDiv, decideDiv, resultsDiv]) {
+        for (let div of [waitDiv, decideDiv, resultsDiv, waitRondaDiv]) {
             div.style.display = (div === ele) ? 'block' : 'none';
         }
     }
@@ -370,6 +386,7 @@ $('#js-resetTimer').click(function () {
     }
 
     function liveRecv(data) {
+        console.log('liveRecv', JSON.stringify(data))
         console.log('received a message!', data);
         
         if ('proposals' in data){
@@ -388,11 +405,14 @@ $('#js-resetTimer').click(function () {
         
         let is_waiting = data.should_wait;
         let is_results = data.show_results;
+        let is_nextRound = data.wait_ronda;
         if (is_waiting) {
             show(waitDiv)
             } else if (is_results) {
-            show(resultsDiv)
-            } else {
+            show(resultsDiv) 
+            } else if (is_nextRound){
+            show(waitRondaDiv)
+            }else {
                 show(decideDiv)
             }
 
